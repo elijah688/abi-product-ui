@@ -1,6 +1,7 @@
-const url = "https://rickandmortyapi.com/api/character";
+const baseUrl = "https://rickandmortyapi.com/api/character";
 
-const api = async (method, data) => {
+const api = async (path, method, data) => {
+  const url = path || baseUrl;
   const payload = data ? { body: JSON.stringify(data) } : {};
   const options = {
     method,
@@ -20,4 +21,4 @@ const api = async (method, data) => {
   return response.json();
 }
 
-exports.getCharacters = () => api("GET");
+exports.getCharacters = (path) => api(path, "GET");

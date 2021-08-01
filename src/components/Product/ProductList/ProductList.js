@@ -1,32 +1,54 @@
-import React, { useEffect, useState } from "react";
+import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
+import React, { useEffect, useState, useCallback} from "react";
 import ProductItem from "./ProductItem";
 import { getCharacters } from "../../../api/api";
 
 const ProductList = () => {
   const [characters, setCharacters] = useState([])
+  const [url, setUrl] = useState(null);
+  const [tmp, setTmp]  = useState(null);
+  const [count, setCount] = useState(0);
+
+  const infiniteLoad = (event) => {
+    setUrl(tmp);
+    event.target.complete();
+  } 
 
   useEffect(() => {
     const loadCharacters = async () => {
-      const { results } = await getCharacters();
-      setCharacters(results);
+      const { results, info: { next } } = await getCharacters(url);
+      setCharacters([...characters, ...results]);
+      setTmp(next);
+      console.log(next);
     }
-    loadCharacters();
-  }, [])
+    try {
+       loadCharacters();
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }, [url])
 
-  // console.log(JSON.stringify(characters[0], null, 4))
-  // console.log(Object.keys(characters[0]));
-  // characters[0] && console.log((characters[0].url))
-  // ["id", "name", "status", "species", "type", "gender", "origin", "location", "image", "episode", "url", "created"]
-
-  const characterList = characters.map(({ id, name, image }) =>
-    <ProductItem
-      key={id}
-      name={name}
-      image={image}
-    />)
-  return characterList;
-
-
+  const productList =
+    characters.map(({ id, name, image }) =>
+      <ProductItem
+        key={id}
+        name={name}
+        image={image}
+      />
+    )
+  return (
+    <>
+      {productList}
+      <IonInfiniteScroll threshold="100px"
+        // disabled={disableInfiniteScroll}
+        onIonInfinite={infiniteLoad}>
+        <IonInfiniteScrollContent
+          loadingText="Loading more good doggos...">
+        </IonInfiniteScrollContent>
+      </IonInfiniteScroll>
+    </>
+  )
 }
 
 export default ProductList;
